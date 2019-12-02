@@ -6,7 +6,7 @@ LABEL maintainer="Arda Cetinkaya"
 WORKDIR /app
 
 # Copy go mod and sum files
-COPY go.mod ./
+COPY go.mod  go.sum ./
 RUN go mod download
 
 # Copy the source from the current directory to the Working Directory inside the container
