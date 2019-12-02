@@ -1,11 +1,16 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 
 	"./config"
+	"github.com/Azure/azure-storage-queue-go/azqueue"
 )
 
 //Log mode
@@ -17,6 +22,9 @@ type Log struct {
 
 //Logs variable
 type Logs []Log
+
+//Configurations variable for settings
+type ConfigurationSettings config.Config
 
 func logs(w http.ResponseWriter, req *http.Request) {
 	switch req.Method {
@@ -36,7 +44,35 @@ func logs(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		//TODO: Save
+		bodyBytes, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			panic(err)
+		}
+		bodyString := string(bodyBytes)
+
+		ConfigurationSettings := config.LoadConfiguration("config.json")
+		credential, err := azqueue.NewSharedKeyCredential(ConfigurationSettings.AzureQueueAccountName, ConfigurationSettings.AzureQueueAccountKey)
+		if err != nil {
+			panic(err)
+		}
+		p := azqueue.NewPipeline(credential, azqueue.PipelineOptions{})
+		u, _ := url.Parse(fmt.Sprintf("https://%s.queue.core.windows.net", ConfigurationSettings.AzureQueueAccountName))
+		serviceURL := azqueue.NewServiceURL(*u, p)
+
+		queueURL := serviceURL.NewQueueURL("logs")
+		ctx := context.TODO()
+		_, err = queueURL.Create(ctx, azqueue.Metadata{})
+		if err != nil {
+			panic(err)
+		}
+
+		messagesURL := queueURL.NewMessagesURL()
+		println(bodyString)
+		_, err = messagesURL.Enqueue(ctx, bodyString, time.Second*0, time.Minute)
+		if err != nil {
+			panic(err)
+		}
+
 	default:
 		http.Error(w, "Invalid method", http.StatusBadRequest)
 	}
@@ -45,11 +81,11 @@ func logs(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 
-	configFile := config.LoadConfiguration("config.json")
+	ConfigurationSettings := config.LoadConfiguration("config.json")
 
 	http.HandleFunc("/logs", logs)
 
-	if err := http.ListenAndServe(configFile.Port, nil); err != nil {
+	if err := http.ListenAndServe(ConfigurationSettings.Port, nil); err != nil {
 		panic(err)
 	}
 }

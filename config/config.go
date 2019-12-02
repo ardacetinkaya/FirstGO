@@ -9,6 +9,8 @@ import (
 type Config struct {
 	ConnectionString string `json:"SQLConnection"`
 	Port string `json:"Port"`
+	AzureQueueAccountName string `json:"AZQAccountName"`
+	AzureQueueAccountKey string `json:"AZQAccountKey"`
 }
 
 func LoadConfiguration(file string) Config {

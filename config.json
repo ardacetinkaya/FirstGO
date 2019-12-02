@@ -1,4 +1,7 @@
 {
     "port": ":8090",
-    "SQLConnection":""
+    "SQLConnection":"",
+    "AZQAccountName":"",
+    "AZQAccountKey":""
+
 }
