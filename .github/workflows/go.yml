@@ -26,3 +26,6 @@ jobs:
 
     - name: Build
       run: go build -v .
+    - name: Build the Docker image
+      if: failure()
+      run: docker build . --file Dockerfile --tag logcollect:$(date +%s)
