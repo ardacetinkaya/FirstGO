@@ -9,8 +9,8 @@ import (
 	"net/url"
 	"time"
 
-	"./config"
 	"github.com/Azure/azure-storage-queue-go/azqueue"
+	"github.com/ardacetinkaya/FirstGO/config"
 )
 
 //Log mode
