@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Copy go mod and sum files
 # COPY go.mod go.sum ./
-RUN go mod download
+# RUN go mod download
 
 # Copy the source from the current directory to the Working Directory inside the container
 COPY . .
