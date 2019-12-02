@@ -6,7 +6,7 @@ LABEL maintainer="Arda Cetinkaya"
 WORKDIR /app
 
 # Copy go mod and sum files
-COPY config/go.mod config/go.sum ./config/
+COPY config/go.mod ./config/
 COPY go.mod go.sum ./
 RUN go mod download
 
