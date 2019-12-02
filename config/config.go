@@ -9,6 +9,7 @@ import (
 type Config struct {
 	ConnectionString      string `json:"SQLConnection"`
 	Port                  string `json:"Port"`
+	Token                 string `json:"Token"`
 	AzureQueueAccountName string `json:"AZQAccountName"`
 	AzureQueueAccountKey  string `json:"AZQAccountKey"`
 }

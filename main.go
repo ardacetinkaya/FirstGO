@@ -11,6 +11,7 @@ import (
 
 	"github.com/Azure/azure-storage-queue-go/azqueue"
 	"github.com/ardacetinkaya/FirstGO/config"
+	"github.com/ardacetinkaya/FirstGO/token"
 )
 
 //Log mode
@@ -38,10 +39,15 @@ func logs(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	case "POST":
+		ConfigurationSettings := config.LoadConfiguration("config.json")
+		authToken, err := token.GetRequestToken(req)
+		if authToken != ConfigurationSettings.Token || err != nil {
+			http.Error(w, "Invalid token.", http.StatusBadRequest)
+		}
 		var l Log
-		err := json.NewDecoder(req.Body).Decode(&l)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+		decodeErr := json.NewDecoder(req.Body).Decode(&l)
+		if decodeErr != nil {
+			http.Error(w, decodeErr.Error(), http.StatusBadRequest)
 			return
 		}
 		bodyBytes, err := ioutil.ReadAll(req.Body)
@@ -50,7 +56,6 @@ func logs(w http.ResponseWriter, req *http.Request) {
 		}
 		bodyString := string(bodyBytes)
 
-		ConfigurationSettings := config.LoadConfiguration("config.json")
 		credential, err := azqueue.NewSharedKeyCredential(ConfigurationSettings.AzureQueueAccountName, ConfigurationSettings.AzureQueueAccountKey)
 		if err != nil {
 			panic(err)
