@@ -26,7 +26,7 @@ jobs:
 
     - name: Build
       run: go build -v .
-    - name: Azure Login Step
+    - name: Azure Login
       if: failure()==false
       uses: azure/login@v1
       with:
