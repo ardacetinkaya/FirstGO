@@ -35,14 +35,14 @@ jobs:
       if: failure()==false
       uses: azure/docker-login@v1
       with:
-        login-server: miyop.azurecr.io
+        login-server: ${{ secrets.AZ_CR_SERVER }}
         username: ${{ secrets.AZ_CR_USERNAME }}
         password: ${{ secrets.AZ_CR_PASSWORD }}
     - name: Docker build & push Step
       if: failure()==false
       run: |
-        docker build . -t miyop.azurecr.io/gosampleapp:latest
-        docker push miyop.azurecr.io/gosampleapp:latest 
+        docker build . -t ${{ secrets.AZ_CR_SERVER }}/gosampleapp:latest
+        docker push ${{ secrets.AZ_CR_SERVER }}/gosampleapp:latest 
     #- name: Build the Docker image
     #  if: failure()==false
     #  run: docker build . --file Dockerfile --tag logcollect:$(date +%s)
