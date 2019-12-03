@@ -26,6 +26,11 @@ jobs:
 
     - name: Build
       run: go build -v .
+    - name: Azure Login
+      if: failure()==false
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZ_LOGIN }}
     - name: Build the Docker image
       if: failure()==false
       run: docker build . --file Dockerfile --tag logcollect:$(date +%s)
