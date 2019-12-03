@@ -31,6 +31,18 @@ jobs:
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZ_LOGIN }}
-    - name: Build the Docker image
+    - name: Azure Container Registery Step
       if: failure()==false
-      run: docker build . --file Dockerfile --tag logcollect:$(date +%s)
+      uses: azure/docker-login@v1
+      with:
+        login-server: miyop.azurecr.io
+        username: ${{ secrets.AZ_CR_USERNAME }}
+        password: ${{ secrets.AZ_CR_PASSWORD }}
+    - name: Docker build & push Step
+      if: failure()==false
+      run: |
+        docker build . -t miyop.azurecr.io/gosampleapp:latest
+        docker push miyop.azurecr.io/gosampleapp:latest 
+    #- name: Build the Docker image
+    #  if: failure()==false
+    #  run: docker build . --file Dockerfile --tag logcollect:$(date +%s)
