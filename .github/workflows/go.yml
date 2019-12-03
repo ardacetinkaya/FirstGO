@@ -42,7 +42,10 @@ jobs:
       if: failure()==false
       run: |
         docker build . -t ${{ secrets.AZ_CR_SERVER }}/gosampleapp:latest
-        docker push ${{ secrets.AZ_CR_SERVER }}/gosampleapp:latest 
+        docker push ${{ secrets.AZ_CR_SERVER }}/gosampleapp:latest
+    - name: Azure Logout Step
+      run: |
+        az logout
     #- name: Build the Docker image
     #  if: failure()==false
     #  run: docker build . --file Dockerfile --tag logcollect:$(date +%s)
