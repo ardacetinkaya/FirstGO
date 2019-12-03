@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 
 	"github.com/Azure/azure-storage-queue-go/azqueue"
@@ -24,8 +25,7 @@ type Log struct {
 //Logs variable
 type Logs []Log
 
-//Configurations variable for settings
-type ConfigurationSettings config.Config
+var ConfigurationSettings config.Config
 
 func logs(w http.ResponseWriter, req *http.Request) {
 	switch req.Method {
@@ -39,26 +39,30 @@ func logs(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	case "POST":
-		ConfigurationSettings := config.LoadConfiguration("config.json")
+
 		authToken, err := token.GetRequestToken(req)
-		if authToken != ConfigurationSettings.Token || err != nil {
-			http.Error(w, "Invalid token.", http.StatusBadRequest)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
-		var l Log
-		decodeErr := json.NewDecoder(req.Body).Decode(&l)
-		if decodeErr != nil {
-			http.Error(w, decodeErr.Error(), http.StatusBadRequest)
+
+		if authToken != ConfigurationSettings.Token {
+			http.Error(w, "Invalid token", http.StatusBadRequest)
 			return
 		}
-		bodyBytes, err := ioutil.ReadAll(req.Body)
+
+		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			panic(err)
+			http.Error(w, "Invalid message body", http.StatusBadRequest)
+			return
 		}
-		bodyString := string(bodyBytes)
+		bodyString := string(body)
+		defer req.Body.Close()
 
 		credential, err := azqueue.NewSharedKeyCredential(ConfigurationSettings.AzureQueueAccountName, ConfigurationSettings.AzureQueueAccountKey)
 		if err != nil {
-			panic(err)
+			http.Error(w, "Invalid credential settings", http.StatusBadRequest)
+			return
 		}
 		p := azqueue.NewPipeline(credential, azqueue.PipelineOptions{})
 		u, _ := url.Parse(fmt.Sprintf("https://%s.queue.core.windows.net", ConfigurationSettings.AzureQueueAccountName))
@@ -72,7 +76,6 @@ func logs(w http.ResponseWriter, req *http.Request) {
 		}
 
 		messagesURL := queueURL.NewMessagesURL()
-		println(bodyString)
 		_, err = messagesURL.Enqueue(ctx, bodyString, time.Second*0, time.Minute)
 		if err != nil {
 			panic(err)
@@ -85,8 +88,18 @@ func logs(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	var configFile string
+	if len(os.Getenv("APP_ENV")) <= 0 {
+		panic(string("Unknown Environment"))
+	} else {
+		if os.Getenv("APP_ENV") == "Development" {
+			configFile = fmt.Sprintf("config.%s.json", "development")
+		} else {
+			configFile = "config.json"
+		}
+	}
 
-	ConfigurationSettings := config.LoadConfiguration("config.json")
+	ConfigurationSettings = config.LoadConfiguration(configFile)
 
 	http.HandleFunc("/logs", logs)
 

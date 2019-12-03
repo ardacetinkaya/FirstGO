@@ -20,10 +20,12 @@ func GetRequestToken(req *http.Request) (string, error) {
 	}
 
 	if strings.HasPrefix(authorizationHeader, "Basic") {
-		basicAuthorization, err := base64.StdEncoding.DecodeString(authorizationHeader[len("Basic"):])
+		basicAuthorization, err := base64.StdEncoding.DecodeString(strings.TrimSpace(authorizationHeader[len("Basic"):]))
+
 		if err != nil {
-			return "", errors.New("Base64 encoding issue")
+			return "", errors.New(err.Error())
 		}
+
 		credentials := strings.Split(string(basicAuthorization), ":")
 		return credentials[0], nil
 	} else {
