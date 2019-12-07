@@ -35,10 +35,6 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET }}
         aws-region: us-west-2
-    - name: Login
-      run: aws ecr get-login | sed 's|https://||'
-
-    
     - name: Build and push image to Amazon ECR
       id: build-image
       env:
@@ -46,6 +42,7 @@ jobs:
         ECR_REPOSITORY: gosampleapp
         IMAGE_TAG: latest
       run: |
+        $(aws ecr get-login --no-include-email --region eu-west-2)
         docker build -t gosampleapp .
         docker tag gosampleapp:latest 475620901817.dkr.ecr.eu-west-2.amazonaws.com/gosampleapp:latest
         docker push 475620901817.dkr.ecr.eu-west-2.amazonaws.com/gosampleapp:latest
