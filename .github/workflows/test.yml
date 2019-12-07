@@ -38,7 +38,7 @@ jobs:
 
     - name: Login to Amazon ECR
       id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+      uses: aws-actions/amazon-ecr-login@v1.0.1
     
     - name: Build and push image to Amazon ECR
       id: build-image
@@ -47,6 +47,7 @@ jobs:
         ECR_REPOSITORY: gosampleapp
         IMAGE_TAG: latest
       run: |
+        docker --version
         docker build -t gosampleapp .
         docker tag gosampleapp:latest https://475620901817.dkr.ecr.eu-west-2.amazonaws.com/gosampleapp:latest
         docker push 475620901817.dkr.ecr.eu-west-2.amazonaws.com/gosampleapp:latest
