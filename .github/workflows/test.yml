@@ -44,10 +44,9 @@ jobs:
       id: build-image
       env:
         ECR_REGISTRY: ${{ secrets.AWS_CONTAINER_REGISTRY }}
-        ECR_REPOSITORY: containers-repo
+        ECR_REPOSITORY: gosampleapp
         IMAGE_TAG: latest
       run: |
-        docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-        docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push 475620901817.dkr.ecr.eu-west-2.amazonaws.com/containers-repo:latest
+        docker build . -t ${{ secrets.AWS_CONTAINER_REGISTRY }}/gosampleapp:latest
+        docker push ${{ secrets.AWS_CONTAINER_REGISTRY }}/gosampleapp:latest
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
