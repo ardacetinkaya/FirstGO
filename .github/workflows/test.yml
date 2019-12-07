@@ -49,5 +49,5 @@ jobs:
       run: |
         docker --version
         docker build -t gosampleapp .
-        docker tag gosampleapp:latest https://475620901817.dkr.ecr.eu-west-2.amazonaws.com/gosampleapp:latest
+        docker tag gosampleapp:latest 475620901817.dkr.ecr.eu-west-2.amazonaws.com/gosampleapp:latest
         docker push 475620901817.dkr.ecr.eu-west-2.amazonaws.com/gosampleapp:latest
