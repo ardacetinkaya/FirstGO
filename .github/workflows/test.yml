@@ -48,6 +48,6 @@ jobs:
         IMAGE_TAG: latest
       run: |
         docker build -t gosampleapp .
-        docker tag gosampleapp:latest 475620901817.dkr.ecr.eu-west-2.amazonaws.com/gosampleapp:latest
-        docker push 475620901817.dkr.ecr.eu-west-2.amazonaws.com/gosampleapp:latest
+        docker tag gosampleapp:latest https://475620901817.dkr.ecr.eu-west-2.amazonaws.com/gosampleapp:latest
+        docker push https://475620901817.dkr.ecr.eu-west-2.amazonaws.com/gosampleapp:latest
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
