@@ -11,8 +11,8 @@ import (
 	"github.com/Azure/azure-storage-queue-go/azqueue"
 )
 
-type QueueDataOption func(q *QueueData)
-type QueueData struct {
+type AzureQueueOption func(q *AzureQueue)
+type AzureQueue struct {
 	Name       string
 	serviceURL azqueue.ServiceURL
 	queueURL   azqueue.QueueURL
@@ -22,8 +22,8 @@ type QueueData struct {
 var credential *azqueue.SharedKeyCredential
 var logger *log.Logger
 
-func CreateQueueManager(opts ...QueueDataOption) *QueueData {
-	qm := &QueueData{}
+func CreateQueueManager(opts ...AzureQueueOption) *AzureQueue {
+	qm := &AzureQueue{}
 	logger = log.New(os.Stdout, "", log.LstdFlags)
 	for _, opt := range opts {
 		opt(qm)
@@ -31,7 +31,7 @@ func CreateQueueManager(opts ...QueueDataOption) *QueueData {
 	return qm
 }
 
-func (qm *QueueData) Init(accountName string, accountKey string) error {
+func (qm *AzureQueue) Init(accountName string, accountKey string) error {
 	credential, err := azqueue.NewSharedKeyCredential(accountName, accountKey)
 	if err != nil {
 		logger.Panicln(err.Error())
@@ -44,7 +44,7 @@ func (qm *QueueData) Init(accountName string, accountKey string) error {
 	qm.serviceURL = s
 	return nil
 }
-func (qm *QueueData) CreateQueue(name string) error {
+func (qm *AzureQueue) CreateQueue(name string) error {
 	qm.queueURL = qm.serviceURL.NewQueueURL(name)
 	qm.ctx = context.TODO()
 	_, err := qm.queueURL.Create(qm.ctx, azqueue.Metadata{})
@@ -55,7 +55,7 @@ func (qm *QueueData) CreateQueue(name string) error {
 
 	return nil
 }
-func (qm *QueueData) Put(messageText string) error {
+func (qm *AzureQueue) Put(messageText string) error {
 
 	messagesURL := qm.queueURL.NewMessagesURL()
 	_, err := messagesURL.Enqueue(qm.ctx, messageText, time.Second*0, time.Minute)

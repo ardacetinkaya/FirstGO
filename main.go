@@ -90,8 +90,8 @@ func logs() http.Handler {
 	})
 }
 
-func WithName(name string) azstoragequeue.QueueDataOption {
-	return func(c *azstoragequeue.QueueData) {
+func WithName(name string) azstoragequeue.AzureQueueOption {
+	return func(c *azstoragequeue.AzureQueue) {
 		c.Name = name
 	}
 }
