@@ -66,7 +66,7 @@ func logs() http.Handler {
 			bodyString := string(body)
 			defer req.Body.Close()
 
-			qm := azstoragequeue.CreateQueueManager()
+			qm := azstoragequeue.CreateQueueManager(WithName("LogQueue"))
 
 			if err := qm.Init(configurationSettings.AzureQueueAccountName, configurationSettings.AzureQueueAccountKey); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -88,6 +88,12 @@ func logs() http.Handler {
 		}
 
 	})
+}
+
+func WithName(name string) azstoragequeue.QueueDataOption {
+	return func(c *azstoragequeue.QueueData) {
+		c.Name = name
+	}
 }
 
 func main() {
