@@ -1,17 +1,15 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"time"
 
-	"github.com/Azure/azure-storage-queue-go/azqueue"
+	"github.com/ardacetinkaya/FirstGO/azstoragequeue"
 	"github.com/ardacetinkaya/FirstGO/config"
 	"github.com/ardacetinkaya/FirstGO/token"
 )
@@ -68,26 +66,21 @@ func logs() http.Handler {
 			bodyString := string(body)
 			defer req.Body.Close()
 
-			credential, err := azqueue.NewSharedKeyCredential(configurationSettings.AzureQueueAccountName, configurationSettings.AzureQueueAccountKey)
-			if err != nil {
-				http.Error(w, "Invalid credential settings", http.StatusBadRequest)
+			qm := azstoragequeue.CreateQueueManager()
+
+			if err := qm.Init(configurationSettings.AzureQueueAccountName, configurationSettings.AzureQueueAccountKey); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			p := azqueue.NewPipeline(credential, azqueue.PipelineOptions{})
-			u, _ := url.Parse(fmt.Sprintf("https://%s.queue.core.windows.net", configurationSettings.AzureQueueAccountName))
-			serviceURL := azqueue.NewServiceURL(*u, p)
 
-			queueURL := serviceURL.NewQueueURL("logs")
-			ctx := context.TODO()
-			_, err = queueURL.Create(ctx, azqueue.Metadata{})
-			if err != nil {
-				panic(err)
+			if err := qm.CreateQueue("logs"); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
 			}
 
-			messagesURL := queueURL.NewMessagesURL()
-			_, err = messagesURL.Enqueue(ctx, bodyString, time.Second*0, time.Minute)
-			if err != nil {
-				panic(err)
+			if err := qm.Put(bodyString); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
 			}
 
 		default:

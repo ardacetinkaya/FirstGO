@@ -10,4 +10,6 @@ replace github.com/ardacetinkaya/FirstGO/config => ./config
 
 replace github.com/ardacetinkaya/FirstGO/token => ./token
 
+replace github.com/ardacetinkaya/FirstGO/azstoragequeue => ./azstoragequeue
+
 go 1.13
